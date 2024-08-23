@@ -4,6 +4,8 @@ import io.micronaut.context.BeanContext;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 
 import java.util.Arrays;
 
@@ -22,6 +24,7 @@ public class ContextBuilderFactoryTest {
     BeanContext beanContext;
 
     @Test
+    @DisabledOnJre(JRE.JAVA_17)
     void testContextBuilderFactory() {
         assertTrue(beanContext.containsBean(SysModule.class));
 

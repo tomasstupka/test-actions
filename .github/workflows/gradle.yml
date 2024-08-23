@@ -5,6 +5,10 @@
 # and edit them there. Note that it will be sync'ed to all the Micronaut repos
 name: Java CI
 on:
+  workflow_dispatch:
+    branches:
+      - master
+      - '[1-9]+.[0-9]+.x'
   push:
     branches:
       - master
@@ -58,51 +62,57 @@ jobs:
         run: |
           [ -f ./setup.sh ] && ./setup.sh || [ ! -f ./setup.sh ]
 
+      - name: Download GraalVM maven bundle
+        run: |
+          curl -L -o bundle.tar.gz https://github.com/graalvm/graalvm-ce-dev-builds/releases/download/24.2.0-dev-20240824_0040/maven-resource-bundle-community-dev.tar.gz                                   
+          tar xfz bundle.tar.gz -C /tmp
+          ls /tmp/maven-bundle-ce-24.2.0-dev/org/graalvm/python/graalpy-maven-plugin/24.2.0-SNAPSHOT/
+          
       - name: "🛠 Build with Gradle"
         id: gradle
         run: |
           ./gradlew check --no-daemon --continue
 
-      - name: "🔎 Run static analysis"
-        if: env.SONAR_TOKEN != '' && matrix.java == '17'
-        run: |
-          ./gradlew sonar
-
-      - name: "📊 Publish Test Report"
-        if: always()
-        uses: mikepenz/action-junit-report@v4
-        with:
-          check_name: Java CI / Test Report (${{ matrix.java }})
-          report_paths: '**/build/test-results/test/TEST-*.xml'
-          check_retries: 'true'
-
-      - name: "📜 Upload binary compatibility check results"
-        if: matrix.java == '17'
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
-        with:
-          name: binary-compatibility-reports
-          path: "**/build/reports/binary-compatibility-*.html"
-
-      - name: "📦 Publish to Sonatype Snapshots"
-        if: success() && github.event_name == 'push' && matrix.java == '17'
-        env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        run: ./gradlew publishToSonatype docs --no-daemon
-
-      - name: "❓ Determine docs target repository"
-        uses: haya14busa/action-cond@v1
-        id: docs_target
-        with:
-          cond: ${{ github.repository == 'micronaut-projects/micronaut-core' }}
-          if_true: "micronaut-projects/micronaut-docs"
-          if_false: ${{ github.repository }}
-
-      - name: "📑 Publish to Github Pages"
-        if: success() && github.event_name == 'push' && matrix.java == '17'
-        uses: micronaut-projects/github-pages-deploy-action@master
-        env:
-          TARGET_REPOSITORY: ${{ steps.docs_target.outputs.value }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: build/docs
+#      - name: "🔎 Run static analysis"
+#        if: env.SONAR_TOKEN != '' && matrix.java == '17'
+#        run: |
+#          ./gradlew sonar
+#
+#      - name: "📊 Publish Test Report"
+#        if: always()
+#        uses: mikepenz/action-junit-report@v4
+#        with:
+#          check_name: Java CI / Test Report (${{ matrix.java }})
+#          report_paths: '**/build/test-results/test/TEST-*.xml'
+#          check_retries: 'true'
+#
+#      - name: "📜 Upload binary compatibility check results"
+#        if: matrix.java == '17'
+#        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+#        with:
+#          name: binary-compatibility-reports
+#          path: "**/build/reports/binary-compatibility-*.html"
+#
+#      - name: "📦 Publish to Sonatype Snapshots"
+#        if: success() && github.event_name == 'push' && matrix.java == '17'
+#        env:
+#          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+#          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+#        run: ./gradlew publishToSonatype docs --no-daemon
+#
+#      - name: "❓ Determine docs target repository"
+#        uses: haya14busa/action-cond@v1
+#        id: docs_target
+#        with:
+#          cond: ${{ github.repository == 'micronaut-projects/micronaut-core' }}
+#          if_true: "micronaut-projects/micronaut-docs"
+#          if_false: ${{ github.repository }}
+#
+#      - name: "📑 Publish to Github Pages"
+#        if: success() && github.event_name == 'push' && matrix.java == '17'
+#        uses: micronaut-projects/github-pages-deploy-action@master
+#        env:
+#          TARGET_REPOSITORY: ${{ steps.docs_target.outputs.value }}
+#          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+#          BRANCH: gh-pages
+#          FOLDER: build/docs

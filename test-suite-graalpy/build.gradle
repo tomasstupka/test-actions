@@ -10,7 +10,7 @@ micronautBuild {
 
 repositories {
     mavenCentral()
-    maven{ url = "file:///tmp/local_graalvm_repo" }
+    maven{ url = "file:///tmp/maven-bundle-ce-24.2.0-dev" }
 }
 
 

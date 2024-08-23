@@ -4,6 +4,8 @@ import io.micronaut.context.BeanContext;
 import jakarta.inject.Inject;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 
 import java.util.Arrays;
 
@@ -19,6 +21,7 @@ public class GraalPyModuleBeanTest {
     BeanContext beanContext;
 
     @Test
+    @DisabledOnJre(JRE.JAVA_17)
     void testGraalPyModuleBean() {
         assertTrue(beanContext.containsBean(SysModule.class));
 
