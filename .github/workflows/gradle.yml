@@ -5,6 +5,10 @@
 # and edit them there. Note that it will be sync'ed to all the Micronaut repos
 name: Java CI
 on:
+  workflow_dispatch:
+    branches:
+      - master
+      - '[1-9]+.[0-9]+.x'
   push:
     branches:
       - master
