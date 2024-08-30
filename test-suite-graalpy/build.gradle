@@ -9,6 +9,7 @@ micronautBuild {
 }
 
 repositories {
+    maven{ url = "file:///tmp/maven-bundle-ce-24.2.0-dev" }
     mavenCentral()
 }
 
